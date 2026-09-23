@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SkyDrop v0.1</title>
+<style>
+  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif;
+         background: #eef1f6; color: #1d2433; }
+  header { background: #16324f; color: #fff; padding: 14px 24px; }
+  header h1 { margin: 0; font-size: 24px; }
+  header p { margin: 3px 0 0; opacity: 0.85; font-size: 14px; }
+  .stats { display: flex; gap: 12px; padding: 14px 24px 0; }
+  .stat { background: #fff; border-radius: 10px; padding: 10px 16px;
+          min-width: 110px; border: 1px solid #dde2ec; }
+  .stat span { display: block; font-size: 22px; font-weight: 600; }
+  .stat label { color: #6b7489; font-size: 13px; }
+  .bar { width: 160px; height: 12px; background: #dde2ec;
+         border-radius: 6px; overflow: hidden; margin: 7px 0 4px; }
+  #batteryBar { height: 100%; background: #2fb57a; }
+  main { display: flex; gap: 16px; padding: 14px 24px 24px; }
+  canvas { background: #fff; border-radius: 10px; cursor: crosshair;
+           border: 1px solid #dde2ec; }
+  aside { flex: 1; min-width: 240px; }
+  .buttons { display: flex; gap: 8px; margin-bottom: 12px; }
+  button { background: #16324f; color: #fff; border: 0; font-size: 14px;
+           border-radius: 8px; padding: 9px 16px; cursor: pointer; }
+  button.secondary { background: #8a94a8; }
+  h3 { margin: 6px 0; font-size: 15px; }
+  ul { list-style: none; padding: 0; margin: 0 0 12px; font-size: 13px; }
+  #queueList li { background: #fff4e0; border-radius: 6px;
+                  padding: 4px 8px; margin-bottom: 4px; }
+  #log { background: #fff; border-radius: 8px; padding: 8px;
+         height: 250px; overflow-y: auto; border: 1px solid #dde2ec; }
+  #log li { padding: 2px 0; border-bottom: 1px solid #f0f2f6; }
+  #log li.bad { color: #c0392b; font-weight: 600; }
+  .legend { font-size: 12px; color: #6b7489; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SkyDrop v0.1</h1>
+  <p>Drone delivery simulator. Click the map to place an order,
+     then press Launch.</p>
+</header>
+
+<section class="stats">
+  <div class="stat"><span id="statQueue">0</span>
+    <label>Orders waiting</label></div>
+  <div class="stat"><span id="statDelivered">0</span>
+    <label>Delivered</label></div>
+  <div class="stat"><span id="statRejected">0</span>
+    <label>Rejected</label></div>
+  <div class="stat"><span id="statState">IDLE</span>
+    <label>Drone status</label></div>
+  <div class="stat"><div class="bar"><div id="batteryBar"></div></div>
+    <label id="batteryLabel">Battery 100%</label></div>
+</section>
+
+<main>
+  <canvas id="map" width="640" height="400"></canvas>
+  <aside>
+    <div class="buttons">
+      <button id="launch">Launch</button>
+      <button id="reset" class="secondary">Reset</button>
+    </div>
+    <h3>Order queue</h3>
+    <ul id="queueList"></ul>
+    <h3>Flight log</h3>
+    <ul id="log"></ul>
+    <div class="legend">H = base &middot; red = no-fly zone &middot;
+      dashed circle = safe range</div>
+  </aside>
+</main>
+
+<script>
+const CELL = 40, COLS = 16, ROWS = 10;
+const RATE = 5;      // battery % used per cell flown
+const SPEED = 0.1;   // cells moved per frame
+const BASE = { x: 2, y: 5 };
+const ZONE = { x1: 7, y1: 2, x2: 9, y2: 4 };
+
+let queue, nextId, delivered, rejected, drone;
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function dist(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function log(text, bad = false) {
+  const li = document.createElement("li");
+  li.textContent = text;
+  if (bad) li.className = "bad";
+  $("log").prepend(li);
+}
+
+function inNoFlyZone(c) {
+  return c.x > ZONE.x1 && c.x < ZONE.x2 &&
+         c.y > ZONE.y1 && c.y < ZONE.y2;
+}
+
+function addOrder(c) {
+  const where = `(${c.x}, ${c.y})`;
+  if (inNoFlyZone(c)) {
+    rejected++;
+    log(`Rejected ${where}: no-fly zone`, true);
+    return;
+  }
+  const needed = dist(BASE, c) * RATE;
+  if (needed > 100) {
+    rejected++;
+    log(`Rejected ${where}: out of range`, true);
+    return;
+  }
+  queue.push({ id: nextId++, x: c.x, y: c.y });
+  log(`Order #${nextId - 1} placed at ${where}`);
+}
+
+function nextOrder() {
+  if (queue.length === 0) {
+    drone.state = "IDLE";
+    log("All orders delivered. Drone at base.");
+    return;
+  }
+  drone.order = queue.pop();
+  drone.target = drone.order;
+  drone.state = "FLYING";
+  log(`Flying to order #${drone.order.id}`);
+}
+
+function arrive() {
+  if (drone.target === BASE) {
+    drone.battery = 100;
+    nextOrder();
+  } else {
+    delivered++;
+    log(`Delivered order #${drone.order.id}`);
+    drone.target = BASE;
+  }
+}
+
+function step() {
+  if (drone.state !== "FLYING") return;
+  const t = drone.target;
+  const d = dist(drone, t);
+  if (d <= SPEED + 1e-6) {
+    drone.x = t.x;
+    drone.y = t.y;
+    arrive();
+    return;
+  }
+  drone.x += ((t.x - drone.x) / d) * SPEED;
+  drone.y += ((t.y - drone.y) / d) * SPEED;
+  drone.battery -= RATE * SPEED;
+  if (drone.battery <= 0) {
+    drone.battery = 0;
+    drone.state = "CRASHED";
+    const x = drone.x.toFixed(1), y = drone.y.toFixed(1);
+    log(`CRASH: battery empty at (${x}, ${y})`, true);
+  }
+}
+
+function reset() {
+  queue = [];
+  nextId = 1;
+  delivered = 0;
+  rejected = 0;
+  drone = { x: BASE.x, y: BASE.y, battery: 100,
+            target: null, order: null, state: "IDLE" };
+  $("log").innerHTML = "";
+  log("System ready.");
+}
+</script>
+<script>
+// ---------- Drawing and user interface (no bugs below) ----------
+const ctx = $("map").getContext("2d");
+const px = v => v * CELL + CELL / 2;
+
+function drawGrid() {
+  ctx.clearRect(0, 0, 640, 400);
+  ctx.strokeStyle = "#eef1f6";
+  for (let x = 0; x <= COLS; x++) {
+    ctx.beginPath(); ctx.moveTo(x * CELL, 0);
+    ctx.lineTo(x * CELL, 400); ctx.stroke();
+  }
+  for (let y = 0; y <= ROWS; y++) {
+    ctx.beginPath(); ctx.moveTo(0, y * CELL);
+    ctx.lineTo(640, y * CELL); ctx.stroke();
+  }
+  ctx.fillStyle = "rgba(220, 53, 69, 0.25)";
+  ctx.fillRect(ZONE.x1 * CELL, ZONE.y1 * CELL,
+    (ZONE.x2 - ZONE.x1 + 1) * CELL, (ZONE.y2 - ZONE.y1 + 1) * CELL);
+  ctx.fillStyle = "#b02a37"; ctx.font = "bold 12px sans-serif";
+  ctx.fillText("NO-FLY ZONE", ZONE.x1 * CELL + 22, ZONE.y1 * CELL - 6);
+  ctx.setLineDash([6, 6]); ctx.strokeStyle = "#3b8ef2";
+  ctx.beginPath();
+  ctx.arc(px(BASE.x), px(BASE.y), (100 / RATE / 2) * CELL, 0, 7);
+  ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = "#16324f";
+  ctx.fillRect(BASE.x * CELL + 4, BASE.y * CELL + 4, 32, 32);
+  ctx.fillStyle = "#fff"; ctx.font = "bold 18px sans-serif";
+  ctx.fillText("H", BASE.x * CELL + 14, BASE.y * CELL + 27);
+}
+
+function drawOrders() {
+  queue.forEach(o => {
+    ctx.fillStyle = "#f2a93b";
+    ctx.fillRect(o.x * CELL + 8, o.y * CELL + 8, 24, 24);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 13px sans-serif";
+    ctx.fillText(o.id, o.x * CELL + 15, o.y * CELL + 25);
+  });
+  if (drone.order && drone.target !== BASE) {
+    const o = drone.order;
+    ctx.strokeStyle = "#f2a93b"; ctx.lineWidth = 3;
+    ctx.strokeRect(o.x * CELL + 8, o.y * CELL + 8, 24, 24);
+    ctx.lineWidth = 1;
+  }
+}
+
+function drawDrone() {
+  const x = px(drone.x), y = px(drone.y);
+  if (drone.state === "CRASHED") {
+    ctx.strokeStyle = "#c0392b"; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(x - 12, y - 12); ctx.lineTo(x + 12, y + 12);
+    ctx.moveTo(x + 12, y - 12); ctx.lineTo(x - 12, y + 12); ctx.stroke();
+    ctx.lineWidth = 1; return;
+  }
+  ctx.strokeStyle = "#1d2433"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(x - 11, y - 11); ctx.lineTo(x + 11, y + 11);
+  ctx.moveTo(x + 11, y - 11); ctx.lineTo(x - 11, y + 11); ctx.stroke();
+  ctx.lineWidth = 1; ctx.fillStyle = "#3b8ef2";
+  [[-11, -11], [11, -11], [-11, 11], [11, 11]].forEach(([a, b]) => {
+    ctx.beginPath(); ctx.arc(x + a, y + b, 6, 0, 7); ctx.fill();
+  });
+  ctx.fillStyle = "#1d2433";
+  ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fill();
+}
+
+function updatePanel() {
+  $("statQueue").textContent = queue.length;
+  $("statDelivered").textContent = delivered;
+  $("statRejected").textContent = rejected;
+  $("statState").textContent = drone.state;
+  const b = Math.max(0, drone.battery);
+  $("batteryBar").style.width = b + "%";
+  $("batteryBar").style.background =
+    b > 50 ? "#2fb57a" : b > 20 ? "#f2a93b" : "#c0392b";
+  $("batteryLabel").textContent = "Battery " + Math.round(b) + "%";
+  $("queueList").innerHTML = queue.map(o =>
+    `<li>#${o.id} &rarr; (${o.x}, ${o.y})</li>`).join("") ||
+    "<li>No orders</li>";
+}
+
+function loop() {
+  step();
+  drawGrid(); drawOrders(); drawDrone(); updatePanel();
+  requestAnimationFrame(loop);
+}
+
+$("map").addEventListener("click", e => {
+  const r = $("map").getBoundingClientRect();
+  addOrder({ x: Math.floor((e.clientX - r.left) / CELL),
+             y: Math.floor((e.clientY - r.top) / CELL) });
+});
+$("launch").onclick = () => {
+  if (drone.state === "IDLE") nextOrder();
+};
+$("reset").onclick = reset;
+reset();
+loop();
+</script>
+</body>
+</html>

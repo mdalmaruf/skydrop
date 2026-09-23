@@ -1,0 +1,13 @@
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+node_modules/
+~$*.docx
+# Instructor material must never be committed here
+*solution*
+*Answer_Key*
+# Student activities are maintained as Markdown in the repository
+labs/**/*.docx
+labs/**/*.pdf
