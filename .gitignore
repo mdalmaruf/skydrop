@@ -4,6 +4,8 @@ Thumbs.db
 .vscode/
 .idea/
 node_modules/
+SE-env/
+.venv/
 ~$*.docx
 # Instructor material must never be committed here
 instructor/

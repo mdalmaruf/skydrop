@@ -14,6 +14,52 @@ No install needed.
 
 The drone flies from the base (H) to each order and back to base to recharge. The red area is a no-fly zone. The dashed circle shows the safe flight range.
 
+### Run from the VS Code terminal
+
+The application can be opened directly, so students do not need a terminal command. If a local web server is preferred, open the repository in VS Code and run:
+
+```powershell
+python -m http.server 8000 --bind 127.0.0.1
+```
+
+Then open `http://127.0.0.1:8000/app/skydrop.html`. Press `Ctrl+C` in the terminal to stop the server. Binding to `127.0.0.1` keeps the preview local to the computer.
+
+## Development environment
+
+Version 0.1 has no Python or Node.js dependencies, so it does not require a virtual environment. An empty environment would add setup work without isolating any packages.
+
+When a Python mission service or hardware interface is introduced in a later activity, create and activate an environment at that point:
+
+```powershell
+python -m venv SE-env
+.\SE-env\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+```
+
+The repository ignores both `SE-env/` and `.venv/`; virtual-environment files must never be committed. To leave the environment, run `deactivate`.
+
+## Publish to GitHub
+
+Create an empty GitHub repository without a generated README, license, or `.gitignore`. Then run these commands once from the VS Code terminal, replacing `YOUR-USERNAME`:
+
+```powershell
+git remote add origin https://github.com/YOUR-USERNAME/skydrop.git
+git push -u origin main
+```
+
+Before pushing, run `git status`. The local `instructor/` folder should not appear because it is ignored. Never force-add it.
+
+For later updates:
+
+```powershell
+git checkout -b feature/short-description
+git add .
+git commit -m "Describe the change"
+git push -u origin feature/short-description
+```
+
+Open a pull request on GitHub, review the change, and merge it into `main`.
+
 ## Repository layout
 
 ```
