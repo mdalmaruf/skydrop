@@ -6,6 +6,7 @@ Thumbs.db
 node_modules/
 ~$*.docx
 # Instructor material must never be committed here
+instructor/
 *solution*
 *Answer_Key*
 # Student activities are maintained as Markdown in the repository
