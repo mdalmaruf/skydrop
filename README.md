@@ -19,10 +19,10 @@ The drone flies from the base (H) to each order and back to base to recharge. Th
 The application can be opened directly, so students do not need a terminal command. If a local web server is preferred, open the repository in VS Code and run:
 
 ```powershell
-python -m http.server 8000 --bind 127.0.0.1
+python -m http.server 8765 --bind 127.0.0.1
 ```
 
-Then open `http://127.0.0.1:8000/app/skydrop.html`. Press `Ctrl+C` in the terminal to stop the server. Binding to `127.0.0.1` keeps the preview local to the computer.
+Then open `http://127.0.0.1:8765/app/skydrop.html`. Press `Ctrl+C` in the terminal to stop the server. Binding to `127.0.0.1` keeps the preview local to the computer. If that port is already in use, choose another number in both the command and URL.
 
 ## Development environment
 
