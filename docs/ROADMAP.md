@@ -7,7 +7,7 @@ SkyDrop grows through a suggested sequence of activities. Each activity adds one
 | Week | Topic | Lab activity | Output in the repo |
 |---|---|---|---|
 | 3 | Project planning | **Lab 1: Debugging.** Find and fix three seeded bugs; write bug reports. | Bug reports as GitHub issues; version 0.2 |
-| 4 | Requirements | Write user stories and acceptance criteria for priority orders and a 20% battery reserve. Write the missing "do not fly through the no-fly zone" requirement. | `docs/requirements.md` v2 |
+| 4 | Requirements | **Lab 2: Requirements discovery.** Run the simulator, identify five functional and five non-functional requirements, and evaluate whether each is met. | Requirements evaluation table and proposed improvements |
 | 5 | UML and design | Class diagram (Drone, Order, Map, Mission) and a state diagram (IDLE, FLYING, CRASHED). Sequence diagram for "place order". | `docs/design/` |
 | 7 | Architecture | Split `app/skydrop.html` into model, view, and controller files (MVC). | `app/model.js`, `app/view.js`, `app/controller.js` |
 | 8 | Clean code and Git | Feature branches, pull requests, and peer code review using `CONTRIBUTING.md`. | Reviewed pull requests |

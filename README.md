@@ -77,6 +77,7 @@ CONTRIBUTING.md         How to branch, commit, and open a pull request
 | Lab | Topic | Folder |
 |---|---|---|
 | 1 | Debugging and bug reports | [labs/lab01-debugging](labs/lab01-debugging) |
+| 2 | Requirements discovery and validation | [labs/lab02-requirements](labs/lab02-requirements) |
 
 More labs are added during the term. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
