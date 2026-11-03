@@ -11,8 +11,8 @@ SkyDrop grows through a suggested sequence of activities. Each activity adds one
 | 5 | UML and design | Class diagram (Drone, Order, Map, Mission) and a state diagram (IDLE, FLYING, CRASHED). Sequence diagram for "place order". | `docs/design/` |
 | 7 | Architecture | Split `app/skydrop.html` into model, view, and controller files (MVC). | `app/model.js`, `app/view.js`, `app/controller.js` |
 | 8 | Clean code and Git | Feature branches, pull requests, and peer code review using `CONTRIBUTING.md`. | Reviewed pull requests |
-| 9 | Testing | Unit tests for `inNoFlyZone()` and `addOrder()` using boundary values. Test plan. | `tests/` |
-| 10 | CI/CD | GitHub Actions runs the tests on every push; badge in README. | `.github/workflows/test.yml` |
+| 9 | Testing | **Lab 3: Feature development and unit testing.** Java edition: manual test table, JUnit tests for `inNoFlyZone()` and `addOrder()` with boundary values, then add FR-7 (off-map orders) test first. | `skydrop-java/src/test/` |
+| 10 | CI/CD | GitHub Actions runs `mvn test` on every push; badge in README. | `.github/workflows/test.yml` |
 | 11 | Security | Validate all order input; discuss what could go wrong if orders came from a network API. | Input validation and tests |
 | 12 | Maintenance | Path planning around the no-fly zone; add a second drone; refactor. | Version 1.0 |
 | 13 | AI-assisted SE | Ask an AI tool to implement a feature, then review, test, and document what it got wrong. | Review report |

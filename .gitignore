@@ -4,6 +4,8 @@ Thumbs.db
 .vscode/
 .idea/
 node_modules/
+skydrop-java/target/
+*.class
 SE-env/
 .venv/
 ~$*.docx
