@@ -12,6 +12,7 @@ Each requirement has an ID so that code, tests, and bug reports can refer to it 
 | FR-4 | An order is accepted only if the battery can cover the whole trip, there and back. |
 | FR-5 | After each delivery, the drone returns to base and recharges to 100%. |
 | FR-6 | The flight log records every order, delivery, rejection, and crash. |
+| FR-7 | Any order outside the map (x 0 to 15, y 0 to 9) is rejected. *(Added in Lab 3.)* |
 
 ## Constants
 
@@ -28,5 +29,5 @@ These are intentionally left open for the requirements lab:
 
 - Nothing says the drone must avoid flying *through* the no-fly zone.
 - There is no safety reserve: the drone may land with 0% battery.
-- Input to `addOrder()` is not validated (orders off the map are possible).
+- Input to `addOrder()` is not validated (orders off the map are possible). Addressed by FR-7 in Lab 3.
 - There is only one drone and no order priority.
