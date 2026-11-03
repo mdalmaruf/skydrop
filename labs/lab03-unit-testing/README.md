@@ -20,6 +20,40 @@ SkyDrop now has a Java edition with the same flight rules as the browser version
 
 ---
 
+## VS Code quick start
+
+The parts below explain each step in detail. This is the whole sequence in one place.
+
+**Setup (first time only)**
+
+1. Clone the repository and open the `skydrop` folder in VS Code (**File > Open Folder**, or `code .` in the terminal). If asked "Do you trust the authors?", click **Yes, I trust the authors**.
+2. If it is not installed, open the Extensions view (**Ctrl+Shift+X**), search for **Extension Pack for Java** (publisher: Microsoft) and click **Install**.
+3. If VS Code reports that no JDK was found, use its **Install JDK** button to install Temurin 17 or newer, then restart VS Code.
+4. Wait for **Java: Ready** in the status bar at the bottom. The first time, VS Code downloads JUnit; this needs internet and takes about a minute. If asked to import the Maven project, accept.
+
+**Run the app (Parts 1 and 2)**
+
+5. In the Explorer, expand `skydrop-java > src > main > java > skydrop` and open `SkyDropApp.java`.
+6. Click **Run** just above `public static void main`. The SkyDrop window opens.
+7. Work through the manual test table, then close the window.
+
+**Run the tests (Part 4)**
+
+8. Open `skydrop-java > src > test > java > skydrop > MissionTest.java`.
+9. Click the **flask icon** (Testing) in the left bar, expand `MissionTest` and press **Run**. TC1 to TC3 show green ticks. You can also run a single test from the green triangle in the editor margin.
+10. Click any test to see its result. A failed test shows the expected and actual values in red.
+
+**Write tests and the feature (Parts 5 and 6)**
+
+11. TC4: select the commented TC4 lines, press **Ctrl+/** to uncomment them, fill in the blanks, save (**Ctrl+S**) and run the tests again.
+12. TC5: uncomment and write TC5, then run it. It must fail (red).
+13. Open `Mission.java`, add `isOnMap()` and the check in `addOrder()`, save, and run **all** tests. All five should be green.
+14. Run `SkyDropApp.java` again and type (2, 10). It should now be rejected.
+
+If the **Run** link or the tests do not appear, press **Ctrl+Shift+P** and choose **Java: Clean Java Language Server Workspace**.
+
+---
+
 ## Part 1: Clone and open the project (3 min)
 
 You need **JDK 17 or newer** and **VS Code** with the **Extension Pack for Java** (publisher: Microsoft). You do not need to install Maven; VS Code uses its own copy.
